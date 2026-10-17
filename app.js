@@ -121,20 +121,37 @@ document.addEventListener('keydown',e=>{
 });
 const music = {
   enabled:false, context:null, gain:null, timer:null, audio:null, step:0,
-  trackUrl:'', tracks:new Map(),
+  trackUrl:'', positions:new Map(), playRequest:0, selection:0,
   useTrack(url) {
     if (!url || url === this.trackUrl) return;
-    if (this.audio) this.audio.pause();
-    if (!this.tracks.has(url)) {
-      const audio = new Audio(url);
-      audio.preload = 'metadata'; audio.loop = true; audio.volume = 1;
-      this.tracks.set(url, audio);
+    // Keep the same media element unlocked by the first tap on iOS.
+    // Invalidate old play promises before replacing its source.
+    this.playRequest += 1;
+    const selection = ++this.selection;
+    if (!this.audio) {
+      this.audio = new Audio();
+      this.audio.preload = 'metadata'; this.audio.loop = true; this.audio.volume = 1;
+      this.audio.id = 'background-music'; this.audio.hidden = true;
+      document.body.append(this.audio);
     }
-    this.audio = this.tracks.get(url);
+    if (this.context) void this.context.suspend();
+    if (this.audio && this.trackUrl && Number.isFinite(this.audio.currentTime)) {
+      this.positions.set(this.trackUrl, this.audio.currentTime);
+    }
+    this.audio.pause();
     this.trackUrl = url;
+    const resumeAt = this.positions.get(url) || 0;
+    this.audio.addEventListener('loadedmetadata', () => {
+      if (selection !== this.selection || !resumeAt) return;
+      try { this.audio.currentTime = Math.min(resumeAt, Math.max(0, this.audio.duration - .25)); }
+      catch { /* Playback can still start if seeking is unavailable. */ }
+    }, { once: true });
+    this.audio.src = url;
+    this.audio.load();
     if (this.enabled) void this.setEnabled(true);
   },
   async setEnabled(value) {
+    const request = ++this.playRequest;
     this.enabled=value;
     const toggle=document.querySelector('#sound');
     toggle.setAttribute('aria-pressed',String(value));
@@ -142,7 +159,7 @@ const music = {
     toggle.innerHTML=value?'♫ <span>Выкл.</span>':'♪ <span>Звук</span>';
     if(!value){if(this.audio)this.audio.pause();if(this.context)await this.context.suspend();return;}
     try {
-      if(CONFIG.musicUrl){
+      if(this.audio || CONFIG.musicUrl){
         if(!this.audio){this.audio=new Audio(CONFIG.musicUrl);this.audio.loop=true;this.audio.volume=1;}
         await this.audio.play();
       } else {
@@ -153,7 +170,11 @@ const music = {
         await this.context.resume();
         if(!this.timer){this.note();this.timer=setInterval(()=>this.note(),750);}
       }
-    } catch(error){console.warn('Музыка недоступна:',error.name);this.setEnabled(false);}
+    } catch(error){
+      if (request !== this.playRequest) return;
+      console.warn('Музыка недоступна:',error.name);
+      void this.setEnabled(false);
+    }
   },
   note(){
     if(!this.enabled||this.context.state!=='running')return;
@@ -175,15 +196,9 @@ if (CONFIG.musicUrl) {
   music.audio.volume = 1;
   music.audio.src = CONFIG.musicUrl;
   music.trackUrl = CONFIG.musicUrl;
-  music.tracks.set(CONFIG.musicUrl, music.audio);
-}
-if (CONFIG.laterMusicUrl) {
-  const laterAudio = new Audio();
-  laterAudio.preload = 'metadata';
-  laterAudio.loop = true;
-  laterAudio.volume = 1;
-  laterAudio.src = CONFIG.laterMusicUrl;
-  music.tracks.set(CONFIG.laterMusicUrl, laterAudio);
+  music.audio.id = 'background-music';
+  music.audio.hidden = true;
+  document.body.append(music.audio);
 }
 document.querySelector('#sound').addEventListener('click',()=>music.setEnabled(!music.enabled));
 document.addEventListener('visibilitychange',()=>{
