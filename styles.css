@@ -71,3 +71,4 @@
 #download-certificate:disabled{opacity:.5;cursor:default}
 #download-unavailable,#download-notice,#download-status{margin-top:14px;font-size:12px}
 #download-status:empty{display:none}
+#notification-status:empty{display:none}

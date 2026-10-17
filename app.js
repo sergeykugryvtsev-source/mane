@@ -4,7 +4,8 @@ const CONFIG = {
   musicUrl: 'assets/iowa-mayaki-soft.mp3',
   certificateImage: '',
   certificateUrl: '',
-  certificateFile: '',
+  certificateFile: 'assets/test-certificate.pdf',
+  certificateIsTest: true,
   // Public Formspree form URL; never put mail passwords or private API keys here.
   downloadNotificationEndpoint: 'https://formspree.io/f/mjyglneq'
 };
@@ -173,6 +174,15 @@ if(CONFIG.certificateImage||CONFIG.certificateUrl||CONFIG.certificateFile){
   if(CONFIG.certificateImage){const img=new Image();img.src=CONFIG.certificateImage;img.alt='Подарочный сертификат';img.className='certificate-image';content.append(img);}
   const previewUrl = CONFIG.certificateUrl || CONFIG.certificateFile;
   if(previewUrl){const link=document.createElement('a');link.href=previewUrl;link.textContent='Открыть сертификат';link.className='certificate-link';link.target='_blank';link.rel='noopener noreferrer';content.append(link);}
+  if (CONFIG.certificateIsTest) {
+    document.querySelector('#certificate-title').textContent = 'Проверка скачивания';
+    const note = document.createElement('p');
+    note.className = 'note';
+    note.textContent = 'Временный тестовый PDF. Это не подарочный сертификат. Настоящий сертификат будет добавлен позже.';
+    content.prepend(note);
+    const link = content.querySelector('a');
+    if (link) link.textContent = 'Открыть тестовый PDF';
+  }
 }
 const certificateFile = CONFIG.certificateFile || CONFIG.certificateImage ||
   (/\.(pdf|png|jpe?g|webp)(?:[?#]|$)/i.test(CONFIG.certificateUrl) ? CONFIG.certificateUrl : '');
@@ -186,11 +196,14 @@ try {
   }
 } catch { /* The service is optional until its real form URL is supplied. */ }
 downloadButton.disabled = !certificateFile;
+if (CONFIG.certificateIsTest) downloadButton.textContent = 'Скачать тестовый PDF ↓';
 document.querySelector('#download-unavailable').hidden = Boolean(certificateFile);
 document.querySelector('#download-notice').hidden = !(notificationEndpoint && certificateFile);
 
 async function notifyDownload(filename) {
   if (!notificationEndpoint) return;
+  const status = document.querySelector('#notification-status');
+  if (CONFIG.certificateIsTest) status.textContent = 'Отправляем тестовое уведомление…';
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
   try {
@@ -200,15 +213,24 @@ async function notifyDownload(filename) {
       keepalive: true,
       signal: controller.signal,
       body: JSON.stringify({
-        _subject: 'Нажата кнопка скачивания подарочного сертификата',
+        _subject: CONFIG.certificateIsTest ? '[ТЕСТ] Проверка скачивания файла' : 'Нажата кнопка скачивания подарочного сертификата',
         event: 'certificate_download_requested',
-        message: 'Посетитель нажал «Скачать сертификат». Это запрос на скачивание; сохранение файла на телефон браузер не подтверждает.',
+        message: CONFIG.certificateIsTest ? 'Тестовая проверка: нажата кнопка скачивания временного PDF. Это не настоящий сертификат. Сохранение файла на телефон браузер не подтверждает.' : 'Посетитель нажал «Скачать сертификат». Это запрос на скачивание; сохранение файла на телефон браузер не подтверждает.',
+        test: Boolean(CONFIG.certificateIsTest),
         file: filename,
         occurred_at: new Date().toISOString()
       })
     });
-    if (!response.ok) console.warn('Уведомление о запросе скачивания не принято:', response.status);
-  } catch { console.warn('Уведомление о запросе скачивания не отправлено. Скачивание остаётся доступным.'); }
+    if (!response.ok) {
+      console.warn('Уведомление о запросе скачивания не принято:', response.status);
+      if (CONFIG.certificateIsTest) status.textContent = 'Файл можно скачать, но форма не приняла уведомление. Попробуй ещё раз.';
+    } else if (CONFIG.certificateIsTest) {
+      status.textContent = 'Форма приняла тестовое уведомление. Проверь Яндекс Почту и папку «Спам».';
+    }
+  } catch {
+    console.warn('Уведомление о запросе скачивания не отправлено. Скачивание остаётся доступным.');
+    if (CONFIG.certificateIsTest) status.textContent = 'Файл можно скачать, но уведомление не отправилось. Проверь интернет и попробуй ещё раз.';
+  }
   finally { clearTimeout(timeout); }
 }
 
@@ -217,7 +239,7 @@ downloadButton.addEventListener('click', () => {
   const file = new URL(certificateFile, document.baseURI);
   if (!['https:', 'http:'].includes(file.protocol)) return;
   const ext = file.pathname.match(/\.(pdf|png|jpe?g|webp)$/i)?.[1] || 'pdf';
-  const filename = `Подарочный сертификат.${ext}`;
+  const filename = `${CONFIG.certificateIsTest ? 'Тестовый файл' : 'Подарочный сертификат'}.${ext}`;
   const link = document.createElement('a');
   link.href = file.href;
   link.download = filename;
