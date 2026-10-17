@@ -72,3 +72,17 @@
 #download-unavailable,#download-notice,#download-status{margin-top:14px;font-size:12px}
 #download-status:empty{display:none}
 #notification-status:empty{display:none}
+/* Two optional pages reached from “Оставить на потом”. Copy is editable in HTML. */
+.later-copy{position:absolute;top:17%;bottom:19%;left:13%;right:12%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:24px;text-align:center;font-size:clamp(17px,4.8cqw,22px);line-height:1.45}
+.later-copy h2{font-size:clamp(35px,10.5cqw,48px);font-weight:400;line-height:1.1;color:#913e2e}
+.later-copy .eyebrow{font-size:10px;letter-spacing:2px}
+.year-note{align-self:stretch;display:grid;gap:9px;border-top:1px solid #ba9470;border-bottom:1px solid #ba9470;padding:16px 0}
+.year-note strong{font-size:clamp(16px,4.6cqw,21px);font-weight:400}
+.year-note>span:last-child{font-size:13px;color:#6f654d}
+.year-note .little-heart{font-size:32px;text-align:center}
+.later-wish{position:absolute;top:18%;left:12%;right:10%;text-align:center;color:#3c2b21}
+.later-wish h2{font-weight:400;font-size:clamp(29px,8cqw,37px);line-height:1.3;transform:rotate(-4deg)}
+.later-wish .drawn-heart{font-size:40px;margin:14px 0}
+.later-wish p{font-size:clamp(19px,5.5cqw,25px);line-height:1.45}
+.later-return{font-size:clamp(15px,4.3cqw,19px);padding-left:14px;padding-right:14px}
+@container(max-height:740px){.later-copy{top:17%;bottom:17%;gap:16px;font-size:17px}.later-copy h2{font-size:35px}.year-note{padding:12px 0;gap:7px}.later-wish{top:17%}.later-wish h2{font-size:29px}.later-wish p{font-size:19px}.later-wish .drawn-heart{margin:9px 0;font-size:33px}}

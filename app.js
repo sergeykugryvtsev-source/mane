@@ -2,6 +2,7 @@
 // Set these to the real gift before sharing. Relative URLs are supported.
 const CONFIG = {
   musicUrl: 'assets/iowa-mayaki-soft.mp3',
+  laterMusicUrl: '',
   certificateImage: '',
   certificateUrl: '',
   certificateFile: 'assets/test-certificate.pdf',
@@ -15,7 +16,9 @@ const descriptions = [
   'У тебя наверняка сложилось впечатление, что вершина моих кулинарных способностей — паста с васаби… Предлагаю проверить, есть ли у меня шансы на что-то посерьёзнее.',
   'Хочу пригласить тебя на кулинарный мастер-класс. Выберем что-нибудь интересное и приготовим вкусный ужин вместе.',
   'Но самое важное… Это подарок тебе, и только тебе решать, как им воспользоваться. Ты можешь пойти со мной, с кем-то другим или выбрать удобное время для себя. Никаких обязательств и ожиданий. Просто приятный опыт и новые впечатления.',
-  'Пусть в твоей жизни будет больше приятных моментов, новых впечатлений и вкусных открытий.'
+  'Пусть в твоей жизни будет больше приятных моментов, новых впечатлений и вкусных открытий.',
+  'Всему своё время. Ты можешь всегда вернуться. Сертификат действует год.',
+  'Когда захочется — возвращайся. Твоё приглашение будет ждать здесь.'
 ];
 const slides = document.querySelector('#slides');
 let current = 0, opening = false, opened = false;
@@ -38,14 +41,14 @@ loadImage(0);
 slides.querySelector('.seal').addEventListener('click', openEnvelope);
 slides.querySelectorAll('.next').forEach(button => button.addEventListener('click', () => go(current + 1)));
 slides.querySelector('.details').addEventListener('click', showCertificate);
-slides.querySelector('.postpone').addEventListener('click', () => {
-  document.querySelector('#later').textContent = 'Можно вернуться в любой момент ♡';
-  document.querySelector('#later').hidden = false;
-  setTimeout(() => document.querySelector('#later').hidden = true, 4000);
-});
+slides.querySelector('.slide-6 .postpone').addEventListener('click', () => go(6));
+slides.querySelector('.later-return').addEventListener('click', () => go(5));
+slides.querySelector('.later-certificate').addEventListener('click', showCertificate);
 // Shared 4-second timeline: rising smoke for the envelope, a light sweep elsewhere.
 async function go(index) {
   if (index < 0 || index >= slides.children.length || index === current || opening) return false;
+  // Switch inside the tap gesture, before decoding or animation (needed by iOS).
+  music.useTrack(index >= 6 ? CONFIG.laterMusicUrl : CONFIG.musicUrl);
   opening = true;
   const invitation = document.querySelector('.invitation');
   const isEnvelope = current === 0 && index === 1;
@@ -81,11 +84,12 @@ async function go(index) {
       el.inert = i !== current;
     });
     back.hidden = current === 0;
-    document.querySelector('#announcement').textContent = `Экран ${current + 1} из 6. ${descriptions[current]}`;
+    document.querySelector('#announcement').textContent = `${target.getAttribute('aria-label')}. ${descriptions[current]}`;
     changed = true;
     await pause(3100);
     return true;
   } catch {
+    music.useTrack(current >= 6 ? CONFIG.laterMusicUrl : CONFIG.musicUrl);
     const status = document.querySelector('#later');
     status.textContent = 'Не удалось загрузить следующий экран. Попробуй ещё раз.';
     status.hidden = false;
@@ -117,6 +121,19 @@ document.addEventListener('keydown',e=>{
 });
 const music = {
   enabled:false, context:null, gain:null, timer:null, audio:null, step:0,
+  trackUrl:'', tracks:new Map(),
+  useTrack(url) {
+    if (!url || url === this.trackUrl) return;
+    if (this.audio) this.audio.pause();
+    if (!this.tracks.has(url)) {
+      const audio = new Audio(url);
+      audio.preload = 'metadata'; audio.loop = true; audio.volume = 1;
+      this.tracks.set(url, audio);
+    }
+    this.audio = this.tracks.get(url);
+    this.trackUrl = url;
+    if (this.enabled) void this.setEnabled(true);
+  },
   async setEnabled(value) {
     this.enabled=value;
     const toggle=document.querySelector('#sound');
@@ -157,6 +174,8 @@ if (CONFIG.musicUrl) {
   // This also works on iOS, where HTMLMediaElement.volume can be ignored.
   music.audio.volume = 1;
   music.audio.src = CONFIG.musicUrl;
+  music.trackUrl = CONFIG.musicUrl;
+  music.tracks.set(CONFIG.musicUrl, music.audio);
 }
 document.querySelector('#sound').addEventListener('click',()=>music.setEnabled(!music.enabled));
 document.addEventListener('visibilitychange',()=>{
