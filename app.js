@@ -42,9 +42,14 @@ loadImage(0);
 slides.querySelector('.seal').addEventListener('click', openEnvelope);
 slides.querySelectorAll('.next').forEach(button => button.addEventListener('click', () => go(current + 1)));
 slides.querySelector('.details').addEventListener('click', showCertificate);
-slides.querySelector('.slide-6 .postpone').addEventListener('click', () => go(6));
+slides.querySelector('.slide-6 .postpone').addEventListener('click', () => {
+  if (opening || current !== 5) return;
+  void notifyAction('invitation_postponed', 'Оставить на потом');
+  void go(6);
+});
 slides.querySelector('.later-return').addEventListener('click', () => go(5));
 slides.querySelector('.later-close').addEventListener('click', () => {
+  void notifyAction('close_page_clicked', 'Закрыть страницу');
   void music.setEnabled(false);
   try { window.close(); } catch { /* Some browsers reject closing a user-opened tab. */ }
   // If closing succeeds, this timer disappears with the tab. Otherwise explain the limitation.
@@ -251,6 +256,32 @@ try {
 downloadButton.disabled = !certificateFile;
 if (CONFIG.certificateIsTest) downloadButton.textContent = 'Скачать тестовый PDF ↓';
 document.querySelector('#download-unavailable').hidden = Boolean(certificateFile);
+
+// keepalive lets the browser finish a small request even if window.close succeeds.
+// These events record a click, not proof that the tab closed or the gift was declined.
+const actionNotificationTimes = new Map();
+async function notifyAction(event, button) {
+  if (!notificationEndpoint) return;
+  const now = Date.now();
+  if (now - (actionNotificationTimes.get(event) || 0) < 1500) return;
+  actionNotificationTimes.set(event, now);
+  try {
+    const response = await fetch(notificationEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({
+        _subject: `Нажата кнопка «${button}»`,
+        event,
+        message: `Посетитель нажал кнопку «${button}» на странице приглашения.`,
+        occurred_at: new Date(now).toISOString()
+      })
+    });
+    if (!response.ok) console.warn('Уведомление о нажатии кнопки не принято:', response.status);
+  } catch {
+    console.warn('Уведомление о нажатии кнопки не отправлено.');
+  }
+}
 
 async function notifyDownload(filename) {
   if (!notificationEndpoint) return;
