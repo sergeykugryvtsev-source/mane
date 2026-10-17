@@ -6,7 +6,7 @@ const CONFIG = {
   certificateUrl: '',
   certificateFile: '',
   // Public Formspree form URL; never put mail passwords or private API keys here.
-  downloadNotificationEndpoint: ''
+  downloadNotificationEndpoint: 'https://formspree.io/f/mjyglneq'
 };
 const descriptions = [
   'Кажется, тебе кое-что передали… Нажми на конверт.',
