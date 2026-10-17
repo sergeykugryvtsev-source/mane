@@ -64,9 +64,9 @@ async function openEnvelope() {
     // Keep both photographs still; a warm mist softens their dissolve.
     // Decode first so the effect never reveals a missing photograph.
     invitation.classList.add('envelope-transition');
-    if (!reducedMotion) await pause(360);
+    if (!reducedMotion) await pause(850);
     go(1, true);
-    if (!reducedMotion) await pause(1300);
+    if (!reducedMotion) await pause(1750);
     opened = true;
   } catch {
     const status = document.querySelector('#later');
