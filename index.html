@@ -5,12 +5,62 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#102c20">
   <title>Для тебя · Приглашение</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
+  <link rel="preload" as="image" href="assets/screen-1-hd.png" fetchpriority="high">
+  <link rel="stylesheet" href="styles.css?v=hd-2">
+  <script src="app.js?v=hd-2" defer></script>
 </head>
 <body>
   <main class="invitation" aria-label="Приглашение на кулинарный мастер-класс">
-    <div class="slides" id="slides"></div>
+    <div class="slides" id="slides">
+      <section class="slide slide-1 active" aria-label="Экран 1 из 6">
+        <div class="art"><img data-src="assets/screen-1-hd.png" width="851" height="1847" fetchpriority="high" alt="Закрытый конверт с красной восковой печатью на столе при свечах"></div>
+        <span class="counter">1 / 6</span>
+        <div class="intro"><p>Кажется,<br>тебе кое-что<br>передали…</p><span class="drawn-heart" aria-hidden="true">♡</span></div>
+        <button class="seal" type="button" aria-label="Открыть конверт и включить музыку"><span class="sr-only">Открыть конверт</span></button>
+        <p class="tap-hint">Нажми на конверт<span aria-hidden="true">⤵</span></p>
+      </section>
+      <section class="slide slide-2" aria-label="Экран 2 из 6" inert>
+        <div class="art"><img data-src="assets/screen-2-hd.png" width="853" height="1844" alt="Открытый бумажный конверт с карточкой приглашения"></div>
+        <span class="counter">2 / 6</span>
+        <div class="card-copy"><h1>Приглашение<br>на кулинарный<br>мастер-класс</h1><span class="drawn-heart" aria-hidden="true">♡</span></div>
+        <button class="next green-button" type="button">Далее <span aria-hidden="true">→</span></button>
+      </section>
+      <section class="slide slide-3 paper-slide" aria-label="Экран 3 из 6" inert>
+        <div class="art"><img data-src="assets/screen-3-hd.png" width="852" height="1846" alt="Паста с песто и базиликом между листами кремовой бумаги"></div>
+        <span class="counter">3 / 6</span>
+        <div class="pasta-copy"><p>У тебя наверняка<br>сложилось впечатление,<br>что вершина моих<br>кулинарных способностей —</p><p class="handwritten highlight">паста с васаби…</p><span class="drawn-heart" aria-hidden="true">♡</span></div>
+        <p class="bottom-copy">Предлагаю проверить,<br>есть ли у меня шансы<br>на что-то посерьёзнее 😉</p>
+        <button class="next green-button" type="button">Далее <span aria-hidden="true">→</span></button>
+      </section>
+      <section class="slide slide-4 paper-slide" aria-label="Экран 4 из 6" inert>
+        <div class="art"><img data-src="assets/screen-4-hd.png" width="853" height="1844" alt="Приготовление овощей в сковороде на уютной ресторанной кухне"></div>
+        <span class="counter">4 / 6</span>
+        <div class="cooking-copy"><h2>Хочу пригласить тебя<br>на кулинарный<br>мастер-класс</h2><span class="drawn-heart" aria-hidden="true">♡</span></div>
+        <p class="bottom-copy">Выберем что-нибудь<br>интересное и приготовим<br>вкусный ужин вместе.</p>
+        <button class="next green-button" type="button">Далее <span aria-hidden="true">→</span></button>
+      </section>
+      <section class="slide slide-5 paper-slide" aria-label="Экран 5 из 6" inert>
+        <div class="art"><img data-src="assets/screen-5-hd.png" width="853" height="1844" alt="Кремовая бумага с оливковыми ветвями"></div>
+        <span class="counter">5 / 6</span>
+        <div class="gift-copy">
+          <h2 class="handwritten">Но самое<br>важное…</h2>
+          <p>Это подарок тебе, и только тебе решать, как им воспользоваться.</p>
+          <ul class="choices">
+            <li><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="9" r="5"/><path d="M6 28v-4a10 10 0 0 1 20 0v4Z"/></svg><span>Ты можешь пойти<br>со мной.</span></li>
+            <li><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="11" cy="9" r="4"/><circle cx="23" cy="11" r="4"/><path d="M2 28v-5a9 9 0 0 1 18 0v5Zm18-10a8 8 0 0 1 11 7v3h-8"/></svg><span>С кем-то другим.</span></li>
+            <li><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="11" width="23" height="18" rx="1"/><path d="M3 10h27v6H3zm13 0v19m0-19C3 10 7-3 13 4l3 6c13 0 9-13 3-6Z"/></svg><span>Или выбрать удобное<br>время для себя.</span></li>
+          </ul>
+          <p class="no-pressure">Никаких обязательств и ожиданий. Просто приятный опыт и новые впечатления. <span class="little-heart" aria-hidden="true">♡</span></p>
+        </div>
+        <button class="next green-button" type="button">Далее <span aria-hidden="true">→</span></button>
+      </section>
+      <section class="slide slide-6" aria-label="Экран 6 из 6" inert>
+        <div class="art"><img data-src="assets/screen-6-hd.png" width="853" height="1844" alt="Терраса со свечой и видом на город на закате"></div>
+        <span class="counter">6 / 6</span>
+        <p class="wish handwritten">Пусть в твоей жизни<br>будет больше<br>приятных моментов,<br><span>новых впечатлений<br>и вкусных открытий ♡</span></p>
+        <div class="final-actions"><button class="details green-button" type="button" aria-label="Узнать подробности — открыть сертификат">Узнать подробности <span aria-hidden="true">→</span></button><button class="postpone" type="button">Оставить на потом</button></div>
+      </section>
+    </div>
     <button class="sound" id="sound" type="button" aria-label="Включить музыку" aria-pressed="false">♫ <span>Звук</span></button>
     <button class="back" id="back" type="button" aria-label="Предыдущий экран" hidden>‹</button>
     <p class="sr-only" id="announcement" aria-live="polite"></p>

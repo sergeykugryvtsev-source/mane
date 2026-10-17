@@ -1,7 +1,6 @@
 'use strict';
 // Set these to the real gift before sharing. Relative URLs are supported.
 const CONFIG = { musicUrl: '', certificateImage: '', certificateUrl: '' };
-const crops = [[35,44,302,678],[381,44,290,678],[713,45,294,677],[1050,45,296,677],[1390,45,293,677],[1729,45,293,677]];
 const descriptions = [
   'Кажется, тебе кое-что передали… Нажми на конверт.',
   'Приглашение на кулинарный мастер-класс.',
@@ -12,31 +11,34 @@ const descriptions = [
 ];
 const slides = document.querySelector('#slides');
 let current = 0, opening = false, opened = false;
-function button(label, cls, action) {
-  const el = document.createElement('button'); el.type = 'button'; el.className = `hit ${cls}`;
-  el.textContent = label; el.setAttribute('aria-label', label); el.addEventListener('click', action); return el;
+// Load the first photograph immediately; warm the next one only after it loads.
+// This avoids six large downloads competing on a mobile connection.
+function loadImage(index) {
+  const img = slides.children[index]?.querySelector('img[data-src]');
+  if (!img) return;
+  img.addEventListener('load', () => {
+    const next = slides.children[index + 1]?.querySelector('img[data-src]');
+    if (next) {
+      if ('requestIdleCallback' in window) requestIdleCallback(() => loadImage(index + 1));
+      else setTimeout(() => loadImage(index + 1), 300);
+    }
+  }, { once: true });
+  img.src = img.dataset.src;
+  delete img.dataset.src;
 }
-crops.forEach(([x,y,w,h],i) => {
-  const section = document.createElement('section'); section.className = `slide${i===0?' active':''}`;
-  section.setAttribute('aria-label', `Экран ${i+1} из 6`); section.inert = i!==0;
-  const art = document.createElement('div'); art.className='art';
-  const img = new Image(); img.src='assets/invitation.png'; img.alt=descriptions[i]; img.draggable=false;
-  Object.assign(img.style,{width:`${2056/w*100}%`,height:`${765/h*100}%`,left:`${-x/w*100}%`,top:`${-y/h*100}%`});
-  art.append(img); section.append(art);
-  if(i===0) section.append(button('Открыть конверт и включить музыку','seal',openEnvelope));
-  else if(i<5) section.append(button('Далее','next',()=>go(current+1)));
-  else {
-    section.append(button('Узнать подробности — открыть сертификат','details',showCertificate));
-    section.append(button('Оставить на потом','postpone',()=>{
-      document.querySelector('#later').hidden=false;
-      setTimeout(()=>document.querySelector('#later').hidden=true,4000);
-    }));
-  }
-  slides.append(section);
+loadImage(0);
+slides.querySelector('.seal').addEventListener('click', openEnvelope);
+slides.querySelectorAll('.next').forEach(button => button.addEventListener('click', () => go(current + 1)));
+slides.querySelector('.details').addEventListener('click', showCertificate);
+slides.querySelector('.postpone').addEventListener('click', () => {
+  document.querySelector('#later').hidden = false;
+  setTimeout(() => document.querySelector('#later').hidden = true, 4000);
 });
 function go(index) {
   if(index<0||index>5||opening)return;
   current=index;
+  loadImage(current);
+  document.querySelector('#later').hidden = true;
   [...slides.children].forEach((el,i)=>{el.classList.toggle('active',i===current);el.inert=i!==current;});
   document.querySelector('#back').hidden=current===0;
   document.querySelector('#announcement').textContent=`Экран ${current+1} из 6. ${descriptions[current]}`;
@@ -48,6 +50,7 @@ function openEnvelope() {
   opened=true; opening=true;
   music.setEnabled(true);
   document.querySelector('#opening').classList.add('play');
+  slides.children[0].classList.add('unsealing');
   setTimeout(()=>{opening=false;go(1);document.querySelector('#opening').classList.remove('play');},matchMedia('(prefers-reduced-motion: reduce)').matches?0:1400);
 }
 document.querySelector('#back').addEventListener('click',()=>go(current-1));
