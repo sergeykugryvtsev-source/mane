@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#102c20">
+  <title>Для тебя · Приглашение</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="invitation" aria-label="Приглашение на кулинарный мастер-класс">
+    <div class="slides" id="slides"></div>
+    <button class="sound" id="sound" type="button" aria-label="Включить музыку" aria-pressed="false">♫ <span>Звук</span></button>
+    <button class="back" id="back" type="button" aria-label="Предыдущий экран" hidden>‹</button>
+    <p class="sr-only" id="announcement" aria-live="polite"></p>
+    <div class="opening" id="opening" aria-hidden="true"><div class="letter">Для тебя<br><span>♡</span></div><div class="flap"></div></div>
+    <div class="later" id="later" role="status" hidden>Можно вернуться в любой момент ♡</div>
+  </main>
+  <dialog id="certificate" aria-labelledby="certificate-title">
+    <button class="close" id="close-certificate" type="button" aria-label="Закрыть сертификат">×</button>
+    <span class="eyebrow">ПОДАРОК ДЛЯ ТЕБЯ</span>
+    <h1 id="certificate-title">Кулинарный<br>мастер-класс</h1>
+    <div class="heart" aria-hidden="true">♡</div>
+    <div id="certificate-content"><p>Здесь будет твой подарочный сертификат.</p><p class="note">Сам сертификат ещё не добавлен.</p></div>
+    <button class="paper-button" id="return" type="button">Вернуться к приглашению</button>
+  </dialog>
+</body>
+</html>
