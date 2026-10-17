@@ -1,6 +1,6 @@
 'use strict';
 // Set these to the real gift before sharing. Relative URLs are supported.
-const CONFIG = { musicUrl: 'assets/iowa-mayaki.mp3', certificateImage: '', certificateUrl: '' };
+const CONFIG = { musicUrl: 'assets/iowa-mayaki-soft.mp3', certificateImage: '', certificateUrl: '' };
 const descriptions = [
   'Кажется, тебе кое-что передали… Нажми на конверт.',
   'Приглашение на кулинарный мастер-класс.',
@@ -98,7 +98,7 @@ const music = {
     if(!value){if(this.audio)this.audio.pause();if(this.context)await this.context.suspend();return;}
     try {
       if(CONFIG.musicUrl){
-        if(!this.audio){this.audio=new Audio(CONFIG.musicUrl);this.audio.loop=true;this.audio.volume=.2;}
+        if(!this.audio){this.audio=new Audio(CONFIG.musicUrl);this.audio.loop=true;this.audio.volume=1;}
         await this.audio.play();
       } else {
         if(!this.context){
@@ -125,7 +125,9 @@ if (CONFIG.musicUrl) {
   music.audio = new Audio();
   music.audio.preload = 'metadata';
   music.audio.loop = true;
-  music.audio.volume = .2;
+  // The file itself is attenuated by 18 dB and fades in over 3 seconds.
+  // This also works on iOS, where HTMLMediaElement.volume can be ignored.
+  music.audio.volume = 1;
   music.audio.src = CONFIG.musicUrl;
 }
 document.querySelector('#sound').addEventListener('click',()=>music.setEnabled(!music.enabled));
