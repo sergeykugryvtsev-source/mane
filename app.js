@@ -31,11 +31,12 @@ slides.querySelector('.seal').addEventListener('click', openEnvelope);
 slides.querySelectorAll('.next').forEach(button => button.addEventListener('click', () => go(current + 1)));
 slides.querySelector('.details').addEventListener('click', showCertificate);
 slides.querySelector('.postpone').addEventListener('click', () => {
+  document.querySelector('#later').textContent = 'Можно вернуться в любой момент ♡';
   document.querySelector('#later').hidden = false;
   setTimeout(() => document.querySelector('#later').hidden = true, 4000);
 });
-function go(index) {
-  if(index<0||index>5||opening)return;
+function go(index, fromEnvelope = false) {
+  if(index<0||index>5||(opening && !fromEnvelope))return;
   current=index;
   loadImage(current);
   document.querySelector('#later').hidden = true;
@@ -44,14 +45,41 @@ function go(index) {
   document.querySelector('#announcement').textContent=`Экран ${current+1} из 6. ${descriptions[current]}`;
   slides.children[current].querySelector('button').focus({preventScroll:true});
 }
-function openEnvelope() {
+async function openEnvelope() {
   if(opening)return;
-  if(opened){go(1);return;}
-  opened=true; opening=true;
-  music.setEnabled(true);
-  document.querySelector('#opening').classList.add('play');
-  slides.children[0].classList.add('unsealing');
-  setTimeout(()=>{opening=false;go(1);document.querySelector('#opening').classList.remove('play');},matchMedia('(prefers-reduced-motion: reduce)').matches?0:1400);
+  opening = true;
+  const invitation = document.querySelector('.invitation');
+  const seal = slides.querySelector('.seal');
+  const photo = slides.children[1].querySelector('.art img');
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+  seal.disabled = true;
+  invitation.setAttribute('aria-busy', 'true');
+  document.querySelector('#later').hidden = true;
+  // Audio must be resumed directly from the tap, before awaiting the photo.
+  if (!opened) music.setEnabled(true);
+  try {
+    loadImage(1);
+    await photo.decode();
+    // Transition between the actual photographs after the next one is ready.
+    // Keep the outgoing photo underneath until the fade completes.
+    invitation.classList.add('envelope-transition');
+    if (!reducedMotion) await pause(180);
+    go(1, true);
+    if (!reducedMotion) await pause(1050);
+    opened = true;
+  } catch {
+    const status = document.querySelector('#later');
+    status.textContent = 'Не удалось загрузить приглашение. Нажми на конверт ещё раз.';
+    status.hidden = false;
+    photo.dataset.src = photo.getAttribute('src');
+    photo.removeAttribute('src');
+  } finally {
+    invitation.classList.remove('envelope-transition');
+    invitation.removeAttribute('aria-busy');
+    seal.disabled = false;
+    opening = false;
+  }
 }
 document.querySelector('#back').addEventListener('click',()=>go(current-1));
 document.addEventListener('keydown',e=>{
