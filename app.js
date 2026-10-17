@@ -1,6 +1,6 @@
 'use strict';
 // Set these to the real gift before sharing. Relative URLs are supported.
-const CONFIG = { musicUrl: '', certificateImage: '', certificateUrl: '' };
+const CONFIG = { musicUrl: 'assets/iowa-mayaki.mp3', certificateImage: '', certificateUrl: '' };
 const descriptions = [
   'Кажется, тебе кое-что передали… Нажми на конверт.',
   'Приглашение на кулинарный мастер-класс.',
@@ -120,6 +120,14 @@ const music = {
     osc.connect(amp);amp.connect(this.gain);osc.start(time);osc.stop(time+2.6);
   }
 };
+// Read just the media metadata ahead of the tap; playback still needs a gesture.
+if (CONFIG.musicUrl) {
+  music.audio = new Audio();
+  music.audio.preload = 'metadata';
+  music.audio.loop = true;
+  music.audio.volume = .2;
+  music.audio.src = CONFIG.musicUrl;
+}
 document.querySelector('#sound').addEventListener('click',()=>music.setEnabled(!music.enabled));
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){if(music.context)music.context.suspend();if(music.audio)music.audio.pause();}
