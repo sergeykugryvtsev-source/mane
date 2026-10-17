@@ -86,3 +86,4 @@
 .later-wish p{font-size:clamp(19px,5.5cqw,25px);line-height:1.45}
 .later-return{font-size:clamp(15px,4.3cqw,19px);padding-left:14px;padding-right:14px}
 @container(max-height:740px){.later-copy{top:14%;bottom:14%;gap:16px;font-size:17px}.licorice-note{font-size:15px;line-height:1.5;padding-left:13px;gap:8px}.later-copy h2{font-size:35px}.year-note{padding:12px 0;gap:7px}.later-wish{top:17%}.later-wish h2{font-size:29px}.later-wish p{font-size:19px}.later-wish .drawn-heart{margin:9px 0;font-size:33px}}
+.close-page-status{position:absolute;left:8%;right:8%;bottom:24%;padding:14px 16px;border-radius:14px;background:#fff2ddeb;color:#314332;box-shadow:0 4px 18px #0003;font:14px/1.45 system-ui;text-align:center}

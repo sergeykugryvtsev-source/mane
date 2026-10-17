@@ -22,6 +22,7 @@ const descriptions = [
 ];
 const slides = document.querySelector('#slides');
 let current = 0, opening = false, opened = false;
+let closePageTimer;
 // Load the first photograph immediately; warm the next one only after it loads.
 // This avoids six large downloads competing on a mobile connection.
 function loadImage(index) {
@@ -43,7 +44,15 @@ slides.querySelectorAll('.next').forEach(button => button.addEventListener('clic
 slides.querySelector('.details').addEventListener('click', showCertificate);
 slides.querySelector('.slide-6 .postpone').addEventListener('click', () => go(6));
 slides.querySelector('.later-return').addEventListener('click', () => go(5));
-slides.querySelector('.later-certificate').addEventListener('click', showCertificate);
+slides.querySelector('.later-close').addEventListener('click', () => {
+  void music.setEnabled(false);
+  try { window.close(); } catch { /* Some browsers reject closing a user-opened tab. */ }
+  // If closing succeeds, this timer disappears with the tab. Otherwise explain the limitation.
+  clearTimeout(closePageTimer);
+  closePageTimer = setTimeout(() => {
+    if (current === 7 && !opening) document.querySelector('#close-page-status').hidden = false;
+  }, 300);
+});
 // Shared 4-second timeline: rising smoke for the envelope, a light sweep elsewhere.
 async function go(index) {
   if (index < 0 || index >= slides.children.length || index === current || opening) return false;
@@ -63,6 +72,8 @@ async function go(index) {
   controls.forEach(button => { button.disabled = true; });
   invitation.setAttribute('aria-busy', 'true');
   document.querySelector('#later').hidden = true;
+  clearTimeout(closePageTimer);
+  document.querySelector('#close-page-status').hidden = true;
   let changed = false;
   try {
     loadImage(index);
