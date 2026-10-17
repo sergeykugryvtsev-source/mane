@@ -2,7 +2,7 @@
 /* Keep the paper text zones aligned on shorter phone viewports. */
 @container (max-height:740px){.slide-3 .art img,.slide-4 .art img{object-fit:fill}.bottom-copy{bottom:12%}}
 
-/* A separate, translucent atmosphere; the photographs stay geometrically unchanged. */
+/* Decorative layers move independently. The photographs never bend or blur. */
 .page-transition .reveal-source,
 .page-transition .reveal-target {
   transform: none;
@@ -16,46 +16,51 @@
   visibility: hidden; opacity: 0; pointer-events: none;
 }
 .page-transition .envelope-atmosphere { visibility: visible; opacity: 1; }
-.mist {
-  position: absolute; opacity: 0; border-radius: 50%;
-  /* Feather only this overlay, never the photographs or their lettering. */
-  filter: blur(20px);
+.smoke-plume {
+  position: absolute; display: none; width: 150%; height: 170%;
+  max-width: none; left: -25%; top: 4%; object-fit: contain; opacity: 0;
+  -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 85%, transparent);
+  mask-image: linear-gradient(transparent, #000 14%, #000 85%, transparent);
 }
-.mist-near {
-  left: -35%; top: 30%; width: 160%; height: 66%;
-  background:
-    radial-gradient(ellipse at 36% 58%, #fff3dbb8, #f3dfbc38 32%, transparent 65%),
-    radial-gradient(ellipse at 73% 43%, #fff1d6b8, #f6e5c830 30%, transparent 62%);
+.transition-smoke .smoke-plume { display: block; }
+.transition-smoke .smoke-main { animation: fireplace-rise 3s linear both; }
+.transition-smoke .smoke-trail { left: -9%; top: 13%; animation: fireplace-trail 2.85s .15s linear both; }
+@keyframes fireplace-rise {
+  0% { opacity: 0; transform: translate3d(-4%,35%,0) scale(.94); }
+  27% { opacity: .78; }
+  57% { opacity: .85; }
+  80% { opacity: .45; }
+  100% { opacity: 0; transform: translate3d(5%,-45%,0) scale(1.16); }
 }
-.mist-far {
-  left: -30%; top: 23%; width: 155%; height: 65%;
-  background:
-    radial-gradient(ellipse at 58% 60%, #fff8e5b3, #fff0cf30 34%, transparent 66%),
-    radial-gradient(ellipse at 21% 45%, #fbeacc80, transparent 57%);
+@keyframes fireplace-trail {
+  0% { opacity: 0; transform: translate3d(7%,38%,0) scaleX(-1) scale(.85); }
+  35% { opacity: .48; }
+  66% { opacity: .6; }
+  100% { opacity: 0; transform: translate3d(-6%,-35%,0) scaleX(-1) scale(1.04); }
 }
-.candle-glow {
+.light-veil {
+  position: absolute; display: none; left: -160%; top: -10%;
+  width: 160%; height: 120%; opacity: 0; filter: blur(14px);
+  background: linear-gradient(105deg, transparent 15%, #ffe4b53d 33%, #fff4dfd9 48%, #fff8ec94 56%, #eed8ae30 70%, transparent 88%);
+}
+.transition-light .light-veil { display: block; animation: light-sweep 3s cubic-bezier(.35,0,.65,1) both; }
+.reverse-reveal .light-veil { animation-direction: reverse; }
+@keyframes light-sweep {
+  0% { opacity: 0; transform: translate3d(0,0,0); }
+  18% { opacity: .9; }
+  50% { opacity: 1; }
+  85% { opacity: .7; }
+  100% { opacity: 0; transform: translate3d(200%,0,0); }
+}
+.quiet-glow {
   position: absolute; inset: 0; opacity: 0;
-  background: radial-gradient(ellipse at 51% 60%, #ffe6b966, #ffdb9d12 35%, transparent 68%);
+  background: radial-gradient(ellipse at 50% 55%, #ffedcf80, #f8e1b62b 45%, transparent 85%);
 }
-.page-transition .mist-near { animation: mist-near 3s ease-in-out both; }
-.page-transition .mist-far { animation: mist-far 2.9s .1s ease-in-out both; }
-.page-transition .candle-glow { animation: candle-reveal 3s ease-in-out both; }
-@keyframes mist-near {
-  0% { opacity: 0; transform: translate3d(-5%,12%,0) rotate(-5deg) scale(.96); }
-  33% { opacity: .94; }
-  58% { opacity: .82; }
-  100% { opacity: 0; transform: translate3d(8%,-25%,0) rotate(6deg) scale(1.1); }
-}
-@keyframes mist-far {
-  0% { opacity: 0; transform: translate3d(8%,14%,0) rotate(5deg); }
-  42% { opacity: .88; }
-  65% { opacity: .68; }
-  100% { opacity: 0; transform: translate3d(-10%,-22%,0) rotate(-8deg) scale(1.13); }
-}
-@keyframes candle-reveal { 0%,100% { opacity: 0; } 40% { opacity: .85; } }
+.page-transition .quiet-glow { animation: quiet-reveal 3s ease-in-out both; }
+@keyframes quiet-reveal { 0%,100% { opacity: 0; } 40%,55% { opacity: .45; } }
+/* Reduced motion retains a readable two-second dissolve, without moving smoke or light. */
 @media(prefers-reduced-motion:reduce) {
-  .page-transition .reveal-source,.page-transition .reveal-target,
-  .reveal-source > :not(.art) { transition: none; }
-  .envelope-atmosphere { display: none; }
-  .page-transition .mist,.page-transition .candle-glow { animation: none; }
+  .page-transition .reveal-source,.page-transition .reveal-target { transform: none; transition: opacity 2s ease, visibility 2s; }
+  .page-transition .smoke-plume,.page-transition .light-veil { display: none; animation: none; }
 }
+.reduced-reveal .smoke-plume,.reduced-reveal .light-veil { display: none; animation: none; }

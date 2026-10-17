@@ -35,11 +35,12 @@ slides.querySelector('.postpone').addEventListener('click', () => {
   document.querySelector('#later').hidden = false;
   setTimeout(() => document.querySelector('#later').hidden = true, 4000);
 });
-// All six screens share the same 3-second reveal: 0.6s mist + 2s fade + 0.4s settle.
+// Shared 3-second timeline: rising smoke for the envelope, a light sweep elsewhere.
 async function go(index) {
   if (index < 0 || index >= slides.children.length || index === current || opening) return false;
   opening = true;
   const invitation = document.querySelector('.invitation');
+  const isEnvelope = current === 0 && index === 1;
   const source = slides.children[current];
   const target = slides.children[index];
   const photo = target.querySelector('.art img');
@@ -55,10 +56,17 @@ async function go(index) {
   try {
     loadImage(index);
     await photo.decode();
+    let useSmoke = isEnvelope;
+    if (useSmoke && !reducedMotion) {
+      try { await invitation.querySelector('.smoke-plume').decode(); }
+      catch { useSmoke = false; } // Decorative asset errors must not block the invitation.
+    }
     source.classList.add('reveal-source');
     target.classList.add('reveal-target');
-    invitation.classList.add('page-transition');
-    if (!reducedMotion) await pause(600);
+    invitation.classList.toggle('reduced-reveal', reducedMotion);
+    invitation.classList.toggle('reverse-reveal', index < current);
+    invitation.classList.add('page-transition', useSmoke ? 'transition-smoke' : 'transition-light');
+    await pause(600);
     current = index;
     [...slides.children].forEach((el, i) => {
       el.classList.toggle('active', i === current);
@@ -67,7 +75,7 @@ async function go(index) {
     back.hidden = current === 0;
     document.querySelector('#announcement').textContent = `Экран ${current + 1} из 6. ${descriptions[current]}`;
     changed = true;
-    if (!reducedMotion) await pause(2400);
+    await pause(2400);
     return true;
   } catch {
     const status = document.querySelector('#later');
@@ -78,7 +86,7 @@ async function go(index) {
     return false;
   } finally {
     // Remove the outgoing layer while it is still covered by the opaque target.
-    invitation.classList.remove('page-transition');
+    invitation.classList.remove('page-transition', 'transition-smoke', 'transition-light', 'reduced-reveal', 'reverse-reveal');
     source.classList.remove('reveal-source');
     target.classList.remove('reveal-target');
     invitation.removeAttribute('aria-busy');
