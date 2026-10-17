@@ -61,12 +61,12 @@ async function openEnvelope() {
   try {
     loadImage(1);
     await photo.decode();
-    // Transition between the actual photographs after the next one is ready.
-    // Keep the outgoing photo underneath until the fade completes.
+    // Keep both photographs still; a warm mist softens their dissolve.
+    // Decode first so the effect never reveals a missing photograph.
     invitation.classList.add('envelope-transition');
-    if (!reducedMotion) await pause(180);
+    if (!reducedMotion) await pause(360);
     go(1, true);
-    if (!reducedMotion) await pause(1050);
+    if (!reducedMotion) await pause(1300);
     opened = true;
   } catch {
     const status = document.querySelector('#later');

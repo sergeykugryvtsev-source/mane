@@ -2,13 +2,62 @@
 /* Keep the paper text zones aligned on shorter phone viewports. */
 @container (max-height:740px){.slide-3 .art img,.slide-4 .art img{object-fit:fill}.bottom-copy{bottom:12%}}
 
-/* Open the envelope through a gentle photographic dissolve, never a drawn overlay. */
-.envelope-transition .slide-1,.envelope-transition .slide-2{transform:none;transition:opacity 1s cubic-bezier(.22,.61,.36,1),visibility 1s}
-.envelope-transition .slide-1{visibility:visible;opacity:1;z-index:0}
-.slide-1 .art img{transition:transform 1.25s cubic-bezier(.22,.61,.36,1)}
-.envelope-transition .slide-1 .art img{transform:scale(1.025)}
-.slide-1 .intro,.slide-1 .tap-hint{transition:opacity .35s ease}
-.envelope-transition .slide-1 .intro,.envelope-transition .slide-1 .tap-hint{opacity:0}
-.envelope-transition .slide-2.active .art img{animation:settle-photo 1.05s cubic-bezier(.22,.61,.36,1) both}
-@keyframes settle-photo{from{transform:scale(1.025)}to{transform:scale(1)}}
-@media(prefers-reduced-motion:reduce){.envelope-transition .slide-1,.envelope-transition .slide-2,.slide-1 .art img,.slide-1 .intro,.slide-1 .tap-hint{transition:none}.envelope-transition .slide-1 .art img{transform:none}.envelope-transition .slide-2.active .art img{animation:none}}
+/* A separate, translucent atmosphere; the photographs stay geometrically unchanged. */
+.envelope-transition .slide-1,
+.envelope-transition .slide-2 {
+  transform: none;
+  transition: opacity .95s cubic-bezier(.22,.61,.36,1), visibility .95s;
+}
+.envelope-transition .slide-1 { visibility: visible; opacity: 1; z-index: 0; }
+.slide-1 .intro, .slide-1 .tap-hint, .slide-1 .counter { transition: opacity .3s ease; }
+.envelope-transition .slide-1 .intro,
+.envelope-transition .slide-1 .tap-hint,
+.envelope-transition .slide-1 .counter { opacity: 0; }
+.envelope-atmosphere {
+  position: absolute; inset: 0; z-index: 3; overflow: hidden;
+  visibility: hidden; opacity: 0; pointer-events: none;
+}
+.envelope-transition .envelope-atmosphere { visibility: visible; opacity: 1; }
+.mist {
+  position: absolute; opacity: 0; border-radius: 50%;
+  /* Feather only this overlay, never the photographs or their lettering. */
+  filter: blur(20px);
+}
+.mist-near {
+  left: -35%; top: 30%; width: 160%; height: 66%;
+  background:
+    radial-gradient(ellipse at 36% 58%, #fff3db9c, #f3dfbc38 32%, transparent 65%),
+    radial-gradient(ellipse at 73% 43%, #fff1d6a3, #f6e5c830 30%, transparent 62%);
+}
+.mist-far {
+  left: -30%; top: 23%; width: 155%; height: 65%;
+  background:
+    radial-gradient(ellipse at 58% 60%, #fff8e599, #fff0cf30 34%, transparent 66%),
+    radial-gradient(ellipse at 21% 45%, #fbeacc80, transparent 57%);
+}
+.candle-glow {
+  position: absolute; inset: 0; opacity: 0;
+  background: radial-gradient(ellipse at 51% 60%, #ffe6b947, #ffdb9d12 35%, transparent 68%);
+}
+.envelope-transition .mist-near { animation: mist-near 1.6s ease-in-out both; }
+.envelope-transition .mist-far { animation: mist-far 1.6s .06s ease-in-out both; }
+.envelope-transition .candle-glow { animation: candle-reveal 1.6s ease-in-out both; }
+@keyframes mist-near {
+  0% { opacity: 0; transform: translate3d(-5%,12%,0) rotate(-5deg) scale(.96); }
+  33% { opacity: .7; }
+  58% { opacity: .58; }
+  100% { opacity: 0; transform: translate3d(8%,-25%,0) rotate(6deg) scale(1.1); }
+}
+@keyframes mist-far {
+  0% { opacity: 0; transform: translate3d(8%,14%,0) rotate(5deg); }
+  42% { opacity: .62; }
+  65% { opacity: .4; }
+  100% { opacity: 0; transform: translate3d(-10%,-22%,0) rotate(-8deg) scale(1.13); }
+}
+@keyframes candle-reveal { 0%,100% { opacity: 0; } 40% { opacity: .65; } }
+@media(prefers-reduced-motion:reduce) {
+  .envelope-transition .slide-1,.envelope-transition .slide-2,
+  .slide-1 .intro,.slide-1 .tap-hint,.slide-1 .counter { transition: none; }
+  .envelope-atmosphere { display: none; }
+  .envelope-transition .mist,.envelope-transition .candle-glow { animation: none; }
+}
