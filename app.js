@@ -2,7 +2,7 @@
 // Set these to the real gift before sharing. Relative URLs are supported.
 const CONFIG = {
   musicUrl: 'assets/iowa-mayaki-soft.mp3',
-  laterMusicUrl: '',
+  laterMusicUrl: 'assets/later-song-soft.mp3',
   certificateImage: '',
   certificateUrl: '',
   certificateFile: 'assets/test-certificate.pdf',
@@ -176,6 +176,14 @@ if (CONFIG.musicUrl) {
   music.audio.src = CONFIG.musicUrl;
   music.trackUrl = CONFIG.musicUrl;
   music.tracks.set(CONFIG.musicUrl, music.audio);
+}
+if (CONFIG.laterMusicUrl) {
+  const laterAudio = new Audio();
+  laterAudio.preload = 'metadata';
+  laterAudio.loop = true;
+  laterAudio.volume = 1;
+  laterAudio.src = CONFIG.laterMusicUrl;
+  music.tracks.set(CONFIG.laterMusicUrl, laterAudio);
 }
 document.querySelector('#sound').addEventListener('click',()=>music.setEnabled(!music.enabled));
 document.addEventListener('visibilitychange',()=>{
