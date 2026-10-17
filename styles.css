@@ -23,8 +23,8 @@
   mask-image: linear-gradient(transparent, #000 14%, #000 85%, transparent);
 }
 .transition-smoke .smoke-plume { display: block; }
-.transition-smoke .smoke-main { animation: fireplace-rise 3s linear both; }
-.transition-smoke .smoke-trail { left: -9%; top: 13%; animation: fireplace-trail 2.85s .15s linear both; }
+.transition-smoke .smoke-main { animation: fireplace-rise 4s linear both; }
+.transition-smoke .smoke-trail { left: -9%; top: 13%; animation: fireplace-trail 3.85s .15s linear both; }
 @keyframes fireplace-rise {
   0% { opacity: 0; transform: translate3d(-4%,35%,0) scale(.94); }
   27% { opacity: .78; }
@@ -43,7 +43,7 @@
   width: 160%; height: 120%; opacity: 0; filter: blur(14px);
   background: linear-gradient(105deg, transparent 15%, #ffe4b53d 33%, #fff4dfd9 48%, #fff8ec94 56%, #eed8ae30 70%, transparent 88%);
 }
-.transition-light .light-veil { display: block; animation: light-sweep 3s cubic-bezier(.35,0,.65,1) both; }
+.transition-light .light-veil { display: block; animation: light-sweep 4s cubic-bezier(.35,0,.65,1) both; }
 .reverse-reveal .light-veil { animation-direction: reverse; }
 @keyframes light-sweep {
   0% { opacity: 0; transform: translate3d(0,0,0); }
@@ -56,7 +56,7 @@
   position: absolute; inset: 0; opacity: 0;
   background: radial-gradient(ellipse at 50% 55%, #ffedcf80, #f8e1b62b 45%, transparent 85%);
 }
-.page-transition .quiet-glow { animation: quiet-reveal 3s ease-in-out both; }
+.page-transition .quiet-glow { animation: quiet-reveal 4s ease-in-out both; }
 @keyframes quiet-reveal { 0%,100% { opacity: 0; } 40%,55% { opacity: .45; } }
 /* Reduced motion retains a readable two-second dissolve, without moving smoke or light. */
 @media(prefers-reduced-motion:reduce) {
@@ -64,3 +64,10 @@
   .page-transition .smoke-plume,.page-transition .light-veil { display: none; animation: none; }
 }
 .reduced-reveal .smoke-plume,.reduced-reveal .light-veil { display: none; animation: none; }
+
+.certificate-actions{display:grid;gap:10px;margin-top:18px}
+.certificate-actions .paper-button{margin-top:0;width:100%;min-height:46px}
+.secondary-button{background:transparent;border:1px solid #75846a;color:#244532}
+#download-certificate:disabled{opacity:.5;cursor:default}
+#download-unavailable,#download-notice,#download-status{margin-top:14px;font-size:12px}
+#download-status:empty{display:none}

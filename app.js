@@ -1,6 +1,13 @@
 'use strict';
 // Set these to the real gift before sharing. Relative URLs are supported.
-const CONFIG = { musicUrl: 'assets/iowa-mayaki-soft.mp3', certificateImage: '', certificateUrl: '' };
+const CONFIG = {
+  musicUrl: 'assets/iowa-mayaki-soft.mp3',
+  certificateImage: '',
+  certificateUrl: '',
+  certificateFile: '',
+  // Public Formspree form URL; never put mail passwords or private API keys here.
+  downloadNotificationEndpoint: ''
+};
 const descriptions = [
   'Кажется, тебе кое-что передали… Нажми на конверт.',
   'Приглашение на кулинарный мастер-класс.',
@@ -35,7 +42,7 @@ slides.querySelector('.postpone').addEventListener('click', () => {
   document.querySelector('#later').hidden = false;
   setTimeout(() => document.querySelector('#later').hidden = true, 4000);
 });
-// Shared 3-second timeline: rising smoke for the envelope, a light sweep elsewhere.
+// Shared 4-second timeline: rising smoke for the envelope, a light sweep elsewhere.
 async function go(index) {
   if (index < 0 || index >= slides.children.length || index === current || opening) return false;
   opening = true;
@@ -66,7 +73,7 @@ async function go(index) {
     invitation.classList.toggle('reduced-reveal', reducedMotion);
     invitation.classList.toggle('reverse-reveal', index < current);
     invitation.classList.add('page-transition', useSmoke ? 'transition-smoke' : 'transition-light');
-    await pause(600);
+    await pause(900);
     current = index;
     [...slides.children].forEach((el, i) => {
       el.classList.toggle('active', i === current);
@@ -75,7 +82,7 @@ async function go(index) {
     back.hidden = current === 0;
     document.querySelector('#announcement').textContent = `Экран ${current + 1} из 6. ${descriptions[current]}`;
     changed = true;
-    await pause(2400);
+    await pause(3100);
     return true;
   } catch {
     const status = document.querySelector('#later');
@@ -161,8 +168,68 @@ function closeCertificate(){dialog.close();}
 document.querySelector('#close-certificate').addEventListener('click',closeCertificate);
 document.querySelector('#return').addEventListener('click',closeCertificate);
 dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeCertificate();}});
-if(CONFIG.certificateImage||CONFIG.certificateUrl){
+if(CONFIG.certificateImage||CONFIG.certificateUrl||CONFIG.certificateFile){
   const content=document.querySelector('#certificate-content');content.replaceChildren();
   if(CONFIG.certificateImage){const img=new Image();img.src=CONFIG.certificateImage;img.alt='Подарочный сертификат';img.className='certificate-image';content.append(img);}
-  if(CONFIG.certificateUrl){const link=document.createElement('a');link.href=CONFIG.certificateUrl;link.textContent='Открыть сертификат';link.className='certificate-link';link.target='_blank';link.rel='noopener noreferrer';content.append(link);}
+  const previewUrl = CONFIG.certificateUrl || CONFIG.certificateFile;
+  if(previewUrl){const link=document.createElement('a');link.href=previewUrl;link.textContent='Открыть сертификат';link.className='certificate-link';link.target='_blank';link.rel='noopener noreferrer';content.append(link);}
 }
+const certificateFile = CONFIG.certificateFile || CONFIG.certificateImage ||
+  (/\.(pdf|png|jpe?g|webp)(?:[?#]|$)/i.test(CONFIG.certificateUrl) ? CONFIG.certificateUrl : '');
+const downloadButton = document.querySelector('#download-certificate');
+const downloadStatus = document.querySelector('#download-status');
+let notificationEndpoint = '';
+try {
+  const endpoint = new URL(CONFIG.downloadNotificationEndpoint);
+  if (endpoint.protocol === 'https:' && endpoint.hostname === 'formspree.io' && /^\/f\/[a-z0-9]+\/?$/i.test(endpoint.pathname)) {
+    notificationEndpoint = endpoint.href;
+  }
+} catch { /* The service is optional until its real form URL is supplied. */ }
+downloadButton.disabled = !certificateFile;
+document.querySelector('#download-unavailable').hidden = Boolean(certificateFile);
+document.querySelector('#download-notice').hidden = !(notificationEndpoint && certificateFile);
+
+async function notifyDownload(filename) {
+  if (!notificationEndpoint) return;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch(notificationEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      keepalive: true,
+      signal: controller.signal,
+      body: JSON.stringify({
+        _subject: 'Нажата кнопка скачивания подарочного сертификата',
+        event: 'certificate_download_requested',
+        message: 'Посетитель нажал «Скачать сертификат». Это запрос на скачивание; сохранение файла на телефон браузер не подтверждает.',
+        file: filename,
+        occurred_at: new Date().toISOString()
+      })
+    });
+    if (!response.ok) console.warn('Уведомление о запросе скачивания не принято:', response.status);
+  } catch { console.warn('Уведомление о запросе скачивания не отправлено. Скачивание остаётся доступным.'); }
+  finally { clearTimeout(timeout); }
+}
+
+downloadButton.addEventListener('click', () => {
+  if (downloadButton.disabled || !certificateFile) return;
+  const file = new URL(certificateFile, document.baseURI);
+  if (!['https:', 'http:'].includes(file.protocol)) return;
+  const ext = file.pathname.match(/\.(pdf|png|jpe?g|webp)$/i)?.[1] || 'pdf';
+  const filename = `Подарочный сертификат.${ext}`;
+  const link = document.createElement('a');
+  link.href = file.href;
+  link.download = filename;
+  if (file.origin !== location.origin) link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  document.body.append(link);
+  link.click();
+  link.remove();
+  downloadStatus.textContent = 'Если файл открылся в браузере, выбери «Поделиться» → «Сохранить в Файлы».';
+  // Send only the button-click event, after the browser has been asked to download.
+  // Mail delivery must never block the certificate or masquerade as proof of saving.
+  void notifyDownload(filename);
+  downloadButton.disabled = true;
+  setTimeout(() => { downloadButton.disabled = false; }, 1500);
+});

@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#102c20">
   <title>Для тебя · Приглашение</title>
   <link rel="preload" as="image" href="assets/screen-1-hd.png" fetchpriority="high">
-  <link rel="stylesheet" href="styles.css?v=smoke-light-13">
-  <script src="app.js?v=smoke-light-13" defer></script>
+  <link rel="stylesheet" href="styles.css?v=certificate-14">
+  <script src="app.js?v=certificate-14" defer></script>
 </head>
 <body>
   <main class="invitation" aria-label="Приглашение на кулинарный мастер-класс">
@@ -77,7 +77,13 @@
     <h1 id="certificate-title">Кулинарный<br>мастер-класс</h1>
     <div class="heart" aria-hidden="true">♡</div>
     <div id="certificate-content"><p>Здесь будет твой подарочный сертификат.</p><p class="note">Сам сертификат ещё не добавлен.</p></div>
-    <button class="paper-button" id="return" type="button">Вернуться к приглашению</button>
+    <div class="certificate-actions">
+      <button class="paper-button" id="download-certificate" type="button" disabled>Скачать сертификат ↓</button>
+      <button class="paper-button secondary-button" id="return" type="button">Вернуться к приглашению</button>
+    </div>
+    <p class="note" id="download-unavailable">Скачивание станет доступно, когда сертификат будет добавлен.</p>
+    <p class="note" id="download-notice" hidden>При нажатии «Скачать сертификат» отправитель подарка получит уведомление.</p>
+    <p class="note" id="download-status" role="status"></p>
   </dialog>
 </body>
 </html>
