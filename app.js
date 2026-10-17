@@ -35,51 +35,63 @@ slides.querySelector('.postpone').addEventListener('click', () => {
   document.querySelector('#later').hidden = false;
   setTimeout(() => document.querySelector('#later').hidden = true, 4000);
 });
-function go(index, fromEnvelope = false) {
-  if(index<0||index>5||(opening && !fromEnvelope))return;
-  current=index;
-  loadImage(current);
-  document.querySelector('#later').hidden = true;
-  [...slides.children].forEach((el,i)=>{el.classList.toggle('active',i===current);el.inert=i!==current;});
-  document.querySelector('#back').hidden=current===0;
-  document.querySelector('#announcement').textContent=`Экран ${current+1} из 6. ${descriptions[current]}`;
-  slides.children[current].querySelector('button').focus({preventScroll:true});
-}
-async function openEnvelope() {
-  if(opening)return;
+// All six screens share the same 3-second reveal: 0.6s mist + 2s fade + 0.4s settle.
+async function go(index) {
+  if (index < 0 || index >= slides.children.length || index === current || opening) return false;
   opening = true;
   const invitation = document.querySelector('.invitation');
-  const seal = slides.querySelector('.seal');
-  const photo = slides.children[1].querySelector('.art img');
+  const source = slides.children[current];
+  const target = slides.children[index];
+  const photo = target.querySelector('.art img');
+  const back = document.querySelector('#back');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
-  seal.disabled = true;
+  const controls = [...source.querySelectorAll('button'), ...target.querySelectorAll('button'), back];
+  const disabledBefore = controls.map(button => button.disabled);
+  controls.forEach(button => { button.disabled = true; });
   invitation.setAttribute('aria-busy', 'true');
   document.querySelector('#later').hidden = true;
-  // Audio must be resumed directly from the tap, before awaiting the photo.
-  if (!opened) music.setEnabled(true);
+  let changed = false;
   try {
-    loadImage(1);
+    loadImage(index);
     await photo.decode();
-    // Keep both photographs still; a warm mist softens their dissolve.
-    // Decode first so the effect never reveals a missing photograph.
-    invitation.classList.add('envelope-transition');
-    if (!reducedMotion) await pause(850);
-    go(1, true);
-    if (!reducedMotion) await pause(1750);
-    opened = true;
+    source.classList.add('reveal-source');
+    target.classList.add('reveal-target');
+    invitation.classList.add('page-transition');
+    if (!reducedMotion) await pause(600);
+    current = index;
+    [...slides.children].forEach((el, i) => {
+      el.classList.toggle('active', i === current);
+      el.inert = i !== current;
+    });
+    back.hidden = current === 0;
+    document.querySelector('#announcement').textContent = `Экран ${current + 1} из 6. ${descriptions[current]}`;
+    changed = true;
+    if (!reducedMotion) await pause(2400);
+    return true;
   } catch {
     const status = document.querySelector('#later');
-    status.textContent = 'Не удалось загрузить приглашение. Нажми на конверт ещё раз.';
+    status.textContent = 'Не удалось загрузить следующий экран. Попробуй ещё раз.';
     status.hidden = false;
     photo.dataset.src = photo.getAttribute('src');
     photo.removeAttribute('src');
+    return false;
   } finally {
-    invitation.classList.remove('envelope-transition');
+    // Remove the outgoing layer while it is still covered by the opaque target.
+    invitation.classList.remove('page-transition');
+    source.classList.remove('reveal-source');
+    target.classList.remove('reveal-target');
     invitation.removeAttribute('aria-busy');
-    seal.disabled = false;
+    controls.forEach((button, i) => { button.disabled = disabledBefore[i]; });
     opening = false;
+    (changed ? target : source).querySelector('button').focus({ preventScroll: true });
   }
+}
+async function openEnvelope() {
+  if (opening) return;
+  // Resume audio in the original tap, before waiting for any image or animation.
+  if (!opened) music.setEnabled(true);
+  if (await go(1)) opened = true;
 }
 document.querySelector('#back').addEventListener('click',()=>go(current-1));
 document.addEventListener('keydown',e=>{
