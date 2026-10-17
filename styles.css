@@ -69,7 +69,7 @@
 .certificate-actions .paper-button{margin-top:0;width:100%;min-height:46px}
 .secondary-button{background:transparent;border:1px solid #75846a;color:#244532}
 #download-certificate:disabled{opacity:.5;cursor:default}
-#download-unavailable,#download-notice,#download-status{margin-top:14px;font-size:12px}
+#download-unavailable,#download-status{margin-top:14px;font-size:12px}
 #download-status:empty{display:none}
 #notification-status:empty{display:none}
 /* Two optional pages reached from “Оставить на потом”. Copy is editable in HTML. */

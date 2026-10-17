@@ -251,7 +251,6 @@ try {
 downloadButton.disabled = !certificateFile;
 if (CONFIG.certificateIsTest) downloadButton.textContent = 'Скачать тестовый PDF ↓';
 document.querySelector('#download-unavailable').hidden = Boolean(certificateFile);
-document.querySelector('#download-notice').hidden = !(notificationEndpoint && certificateFile);
 
 async function notifyDownload(filename) {
   if (!notificationEndpoint) return;
